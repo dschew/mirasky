@@ -15,6 +15,7 @@
  *    \li  04-15-08 DSC Original (Relatively useless file... in progress/planning stages)
  *    \li  04-17-08 DSC Basic layout format written
  *    \li  04-18-08 DSC General variables defined for channels and task state diagram developed
+ *    \li  04-19-08 DSC Minor adjustments to task state diagram (Allowing six DOF to block)
  *
  *  License:
  *    This file released under the Lesser GNU Public License. The program is intended
@@ -29,24 +30,15 @@ const unsigned char linAct_2    =  ;
 // Channel definitions for various measurement devices
 const unsigned char loadCell_1  =  ;
 const unsigned char loadCell_2  =  ;
-const unsigned char pitot	=  ;
-const unsigned char staticM     =  ;
+const unsigned char pitot_1	=  ;
+const unsigned char static_1    =  ;
 
 // Channels for 6 DOF on chassis
-const unsigned char sixDOF_A1   =  ;               
-const unsigned char sixDOF_A2   =  ;               
-const unsigned char sixDOF_A3   =  ;               
-const unsigned char sixDOF_A4   =  ;               
-const unsigned char sixDOF_A5   =  ;               
-const unsigned char sixDOF_A6   =  ;               
+const unsigned char sixDOF_1   =  ;                             
 
 // Channels for 6 DOF on parachute
-const unsigned char sixDOF_B1   =  ;               
-const unsigned char sixDOF_B2   =  ;               
-const unsigned char sixDOF_B3   =  ;               
-const unsigned char sixDOF_B4   =  ;               
-const unsigned char sixDOF_B5   =  ;               
-const unsigned char sixDOF_B6   =  ;               
+const unsigned char sixDOF_2   =  ;               
+;               
 
 //-------------------------------------------------------------------------------------
 /** This constructor creates a sensor control task. The sensor control operates the various
@@ -95,71 +87,69 @@ char task_sensors::run (char state)
 	case (WAIT):
 	    // If the right time has been reached, start moving through the devices for data
 	    if (timeUP)
-	        return (LINACT_1);
+	        return (ACT_1);
 	    break;
 
-	case (LINACT_1):
-	    p_adc -> startConversion(linAct_1);
+	// In State 2, we get data for the first linear actuator and wait for it to be done
+	// before transitioning to the next device
+	case (ACT_1):
+	    p_adc->startConversion(linAct_1);
 
-	    if (p_adc -> convertDone())
+	    if (p_adc->convertDone())
 	    {
-		dataArray[Actuator1] = p_adc -> getValue();
-		return (LINACT_2):
+		dataArray[Actuator1] = p_adc->getValue();
+		return (ACT_2):
 	    }
 
 	    break;
 
-	case (LINACT_2):
+	// In State 3, we get data for the second linear actuator and wait for it to be done
+	// before transitioning to the next device
+	case (ACT_2):
 	    p_adc -> startConversion(linAct_2);
 
 	    if (p_adc -> convertDone())
 	    {
 		dataArray[Actuator2] = p_adc -> getValue();
-		return (SIXDOF_1):
+		return (SIXDOF_A):
 	    }
 
-	    return (SIXDOF_1);
 	    break;
 
-       // In State 1, we check all the A/D channels for data on the first 6 DOF
+       // In State 4, we check all the A/D channels for data on the first 6 DOF
 
-        case (SIX_DOF_1):
-	    p_adc -> startConversion(sixDOF_A1);
-
-	    if (p_adc -> convertDone())
+        case (SIX_DOF_A1):
+	    for (int i = 0; i < 6; i++)
 	    {
-		dataArray[DOF_A1] = p_adc -> getValue();
-	        p_adc -> startConversion(sixDOF_A2);
+	   	 dataArray[sixDOF_A + i] =  p_adc->readonce(sixDOF_1 + i);
 	    }
 
-		if (p_adc -> convertDone())
-	        {
-		    dataArray[DOF_A2] = p_adc -> getValue();
-		    p_adc -> startConversion(sixDOF_A3);
-
-	    	    if (p_adc -> convertDone())
-	   	    {
-			dataArray[DOF_A32] = p_adc -> getValue();
-			return (SIXDOF_1):
-	   	     }
-
-	        }
-
-	    }
-
-	    return (SIXDOF_2);
+	    return (SIX_DOF_B);
             break;
 
         // In State 2, we check all the A/D channels for data on the second 6 DOF
         case (SIXDOF_2):
-	    return (PITOT);
+	    for (int i = 0; i < 6; i++)
+	    {
+		dataArray[sixDOF_B + i] = p_adc->readonce(sixDOF_1 + i);
+	    }
+
+	    return (PITOTTUBE);
             break;
 	
-	case (PITOT):
-	    return (STATICM);
+	case (PITOTTUBE):
+	    p_adc->startConversion(pitot);
+
+	    if (p_adc->convertDone())
+	    {
+		dataArray[PitotT] = p_adc->getValue();
+	    	return (STATICM);
+	    }
+
 	    break;
 
 	case (STATICM):
+	    p_adc->startConversion(
 	    return (LOADCELL_1)
 	    break;
 
