@@ -130,6 +130,7 @@ char task_sensors::run (char state)
 	    {
 		dataArray[DOF_A1] = p_adc -> getValue();
 	        p_adc -> startConversion(sixDOF_A2);
+	    }
 
 		if (p_adc -> convertDone())
 	        {
