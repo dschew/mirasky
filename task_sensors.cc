@@ -92,7 +92,7 @@ char task_sensors::run (char state)
 
 	// In State 1, we wait for the right count before polling the sensors for data
 	case (WAIT):
-	// If the right time has been reached, start moving through the devices for data
+	    // If the right time has been reached, start moving through the devices for data
 	    if (timeUP)
 	        return (LINACT_1);
 	    break;
@@ -100,10 +100,23 @@ char task_sensors::run (char state)
 	case (LINACT_1):
 	    p_adc -> startConversion(linAct_1);
 
-	    return (LINACT_2):
+	    if (p_adc -> convertDone())
+	    {
+		dataArray[Actuator1] = p_adc -> getValue();
+		return (LINACT_2):
+	    }
+
 	    break;
 
 	case (LINACT_2):
+	    p_adc -> startConversion(linAct_2);
+
+	    if (p_adc -> convertDone())
+	    {
+		dataArray[Actuator2] = p_adc -> getValue();
+		return (SIXDOF_1):
+	    }
+
 	    return (SIXDOF_1);
 	    break;
 
