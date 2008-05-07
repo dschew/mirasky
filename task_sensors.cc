@@ -120,7 +120,7 @@ char task_sensors::run (char state)
 	    return (SIXDOF_1);
 	    break;
 
-        // In State 1, we check all the A/D channels for data on the first 6 DOF
+       // In State 1, we check all the A/D channels for data on the first 6 DOF
 
         case (SIX_DOF_1):
 	    p_adc -> startConversion(sixDOF_A1);
