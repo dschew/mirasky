@@ -137,10 +137,10 @@ char task_sensors::run (char state)
 		    p_adc -> startConversion(sixDOF_A3);
 
 	    	    if (p_adc -> convertDone())
-	    {
-		dataArray[Actuator2] = p_adc -> getValue();
-		return (SIXDOF_1):
-	    }
+	   	    {
+			dataArray[DOF_A32] = p_adc -> getValue();
+			return (SIXDOF_1):
+	   	     }
 
 	        }
 
