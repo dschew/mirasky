@@ -23,6 +23,18 @@
  */
 //======================================================================================
 
+// State name definitions
+#define  INIT		=  0
+#define	 WAIT		=  1
+#define  ACT_A		=  2
+#define  ACT_B	        =  3
+#define  SIX_DOF_A	=  4
+#define  SIX_DOF_B	=  5
+#define  PITOTTUBE	=  6
+#define  STATICM	=  7
+#define  LOAD_A		=  8
+#define  LOAD_B		=  9
+
 // Channel definitions for the linear actuators
 const unsigned char linAct_1    =  ;
 const unsigned char linAct_2    =  ;
@@ -34,11 +46,20 @@ const unsigned char pitot_1	=  ;
 const unsigned char static_1    =  ;
 
 // Channels for 6 DOF on chassis
-const unsigned char sixDOF_1   =  ;                             
+const unsigned char sixDOF_1    =  ;                             
 
 // Channels for 6 DOF on parachute
-const unsigned char sixDOF_2   =  ;               
-;               
+const unsigned char sixDOF_2    =  ;               
+
+// Array Slot Labels
+const int linActA 		= 0;		// Linear actuator #1
+const int linActB		= 1;		// Linear actuator #2
+const int sixDOFA		= 2;		// Start of the first six DOF slots
+const int sixDOFB		= 7;		// Start of the second six DOF slots
+const int pitot_A		= 13;		// Pitot tube
+const int static_A		= 14;		// Static measurement device
+const int loadCellA		= 15;		// Load cell #1
+const int loadCellB		= 16;		// Load cell #2
 
 //-------------------------------------------------------------------------------------
 /** This constructor creates a sensor control task. The sensor control operates the various
@@ -87,38 +108,38 @@ char task_sensors::run (char state)
 	case (WAIT):
 	    // If the right time has been reached, start moving through the devices for data
 	    if (timeUP)
-	        return (ACT_1);
+	        return (ACT_A);
 	    break;
 
 	// In State 2, we get data for the first linear actuator and wait for it to be done
 	// before transitioning to the next device
-	case (ACT_1):
+	case (ACT_A):
 	    p_adc->startConversion(linAct_1);
 
 	    if (p_adc->convertDone())
 	    {
 		dataArray[Actuator1] = p_adc->getValue();
-		return (ACT_2):
+		return (ACT_B):
 	    }
 
 	    break;
 
 	// In State 3, we get data for the second linear actuator and wait for it to be done
 	// before transitioning to the next device
-	case (ACT_2):
+	case (ACT_B):
 	    p_adc -> startConversion(linAct_2);
 
 	    if (p_adc -> convertDone())
 	    {
 		dataArray[Actuator2] = p_adc -> getValue();
-		return (SIXDOF_A):
+		return (SIX_DOF_A):
 	    }
 
 	    break;
 
        // In State 4, we check all the A/D channels for data on the first 6 DOF
 
-        case (SIX_DOF_A1):
+        case (SIX_DOF_A):
 	    for (int i = 0; i < 6; i++)
 	    {
 	   	 dataArray[sixDOF_A + i] =  p_adc->readonce(sixDOF_1 + i);
@@ -128,7 +149,7 @@ char task_sensors::run (char state)
             break;
 
         // In State 2, we check all the A/D channels for data on the second 6 DOF
-        case (SIXDOF_2):
+        case (SIX_DOF_B):
 	    for (int i = 0; i < 6; i++)
 	    {
 		dataArray[sixDOF_B + i] = p_adc->readonce(sixDOF_1 + i);
@@ -138,26 +159,26 @@ char task_sensors::run (char state)
             break;
 	
 	case (PITOTTUBE):
-	    p_adc->startConversion(pitot);
+	    p_adc->startConversion(pitot_1);
 
 	    if (p_adc->convertDone())
 	    {
-		dataArray[PitotT] = p_adc->getValue();
+		dataArray[PitotA] = p_adc->getValue();
 	    	return (STATICM);
 	    }
 
 	    break;
 
 	case (STATICM):
-	    p_adc->startConversion(
-	    return (LOADCELL_1)
+	    p_adc->startConversion(static_1)
+	    return (LOAD_A)
 	    break;
 
-	case (LOADCELL_1):
-	    return (LOADCELL_2);
+	case (LOAD_1):
+	    return (LOAD_B);
 	    break;
 
-	case (LOADCELL_2):
+	case (LOAD_B):
 	    return (WAIT);
 	    break;
 
