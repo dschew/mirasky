@@ -52,10 +52,11 @@ const unsigned char sixDOF_B6   =  ;
 /** This constructor creates a sensor control task. The sensor control operates the various
  *  sensors on the Para-Ceres and collects the data and stores it until it is ready to be
  *  broadcast on the radio modem.
- *	Linear Actuator:
- *	Load Cell: 
- *	Pitot Tube:
- *	Static: 
+ *	Linear Actuator: These control the turning lines for the Para-Ceres
+ *			 Data is collected to close the control loop
+ *	Load Cell: These collect data on the force generated from thrust and drag (?)
+ *	Pitot Tube: This collects data on the airflow across the vehicle
+ *	Static:
  *	6 Degree of Freedom:
  *
  *  @param t_stamp   	     A timestamp which contains the time between runs of this task
