@@ -12,8 +12,6 @@
  */
 //======================================================================================
 
-//newcomment
-
 #include <stdlib.h>                         // Include standard library header files
 #include <avr/io.h>
 #include "avr_adc.h"                        // Include header for the A/D class
