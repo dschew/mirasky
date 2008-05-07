@@ -121,7 +121,30 @@ char task_sensors::run (char state)
 	    break;
 
         // In State 1, we check all the A/D channels for data on the first 6 DOF
+
         case (SIX_DOF_1):
+	    p_adc -> startConversion(sixDOF_A1);
+
+	    if (p_adc -> convertDone())
+	    {
+		dataArray[DOF_A1] = p_adc -> getValue();
+	        p_adc -> startConversion(sixDOF_A2);
+
+		if (p_adc -> convertDone())
+	        {
+		    dataArray[DOF_A2] = p_adc -> getValue();
+		    p_adc -> startConversion(sixDOF_A3);
+
+	    	    if (p_adc -> convertDone())
+	    {
+		dataArray[Actuator2] = p_adc -> getValue();
+		return (SIXDOF_1):
+	    }
+
+	        }
+
+	    }
+
 	    return (SIXDOF_2);
             break;
 
