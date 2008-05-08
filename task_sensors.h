@@ -39,10 +39,24 @@ class task_sensors
 	avr_adc* p_adc;			    // Pointer to the A/D converter object
 
     private:
+	int dataArray;			// Have to check these two for type... may need 
+	long timeArray;			// a different variable type for these
+
     public:
 	// This constructor creates a sensor controller to operate the various sensors
         task_sensors (void);
-        char run (char);
+	// This function runs the sensor task
+	char run (char);
+
+	// These functions call the print to serial
+	void printLinActA ();
+	void printLinActB ();
+	void printSixDOFA ();
+	void printSixDOFB ();
+	void printPitot ();
+	void printStatic ();
+	void printLoadA ();
+	void printLoadB ();
 };
 
 #endif // _TASK_SENSORS_H_

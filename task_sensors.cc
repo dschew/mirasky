@@ -1,5 +1,5 @@
 //======================================================================================
-/** \file  task_sensor_control.h
+/** \file  task_sensors.cc
  *  This file contains the class definition for a main sensor control task. This is basically
  *  the operating system for the data collection "unit" for Mirasky's Para-Ceres. Only one of 
  *  these objects are necessary to operate all of the sensors onboard.
@@ -16,7 +16,8 @@
  *    \li  04-17-08 DSC Basic layout format written
  *    \li  04-18-08 DSC General variables defined for channels and task state diagram developed
  *    \li  04-19-08 DSC Minor adjustments to task state diagram (Allowing six DOF to block)
- *
+ *    \li  04-23-08 DSC	Added printing functions (for now testing through the serial port
+ *			future version will send data through the XTend radio module)
  *  License:
  *    This file released under the Lesser GNU Public License. The program is intended
  *    for educational use only, but its use is not restricted thereto. 
@@ -76,11 +77,16 @@ const int loadCellB		= 16;		// Load cell #2
  *  @param p_ser     	     A pointer to a serial port for sending messages if required
  */
 
-task_sensors::task_sensors (time_stamp* t_stamp, avr_uart* p_ser, avr_adc p_)
+task_sensors::task_sensors (time_stamp* t_stamp, avr_uart* p_ser, avr_adc p_avr_adc)
     : stl_task (*t_stamp, p_ser)
 {
-    // Save pointers to motors, and sensors
+    // Save pointers to serial and A/D
     p_serial = p_ser;
+    p_adc = p_avr_adc;
+
+    // Initialize private variables
+    int dataArray[18] = 0;
+    long timeArray[18] = 0;
 
     // Say hello
     p_serial->puts ("Sensor control task constructor\r\n");
@@ -120,7 +126,8 @@ char task_sensors::run (char state)
 	    if (p_adc->convertDone())
 	    {
 		dataArray[actuatorA] = p_adc->getValue();
-		return (ACT_B):
+		timeArray[actuatorA] = currentTIME;
+		return (ACT_B);
 	    }
 
 	    break;
@@ -133,7 +140,8 @@ char task_sensors::run (char state)
 	    if (p_adc -> convertDone())
 	    {
 		dataArray[actuatorB] = p_adc -> getValue();
-		return (SIX_DOF_A):
+		timeArray[actuatorB] = currentTIME;
+		return (SIX_DOF_A);
 	    }
 
 	    break;
@@ -142,7 +150,8 @@ char task_sensors::run (char state)
         case (DOF_A):
 	    for (int i = 0; i < 6; i++)
 	    {
-	   	 dataArray[sixDOFA + i] =  p_adc->readonce(sixDOF_1 + i);
+	        dataArray[sixDOFA + i] = p_adc->read_once(sixDOF_1 + i);
+		timeArray[sixDOFA + i] = currentTIME; 	 
 	    }
 
 	    return (DOF_B);
@@ -152,9 +161,10 @@ char task_sensors::run (char state)
         case (DOF_B):
 	    for (int i = 0; i < 6; i++)
 	    {
-		dataArray[sixDOFB + i] = p_adc->readonce(sixDOF_1 + i);
+		dataArray[sixDOFB + i] = p_adc->read_once(sixDOF_1 + i);
+	   	timeArray[sixDOFB + i] = currentTIME;
 	    }
-
+	
 	    return (PITOTTUBE);
             break;
 	
@@ -164,7 +174,8 @@ char task_sensors::run (char state)
 	    if (p_adc->convertDone())
 	    {
 		dataArray[pitotA] = p_adc->getValue();
-	    	return (STATICM);
+		timeArray[pitotA] = currentTIME; 
+	   	return (STATICM);
 	    }
 
 	    break;
@@ -175,6 +186,7 @@ char task_sensors::run (char state)
 	    if (p_adc->convertDone())
 	    {
 		dataArray[staticA + i] = p_adc->getValue();
+		timeArray[staticA + i] = currentTIME;
 		return (LOAD_A);
 	    }
 
@@ -186,6 +198,7 @@ char task_sensors::run (char state)
 	    if (p_adc->convertDone())
 	    {
 		dataArray[loadCellA + i] = p_adc->getValue();
+		timeArray[loadCellA + i] = currentTIME;
 	        return (LOAD_B);
 	    }
 
@@ -198,6 +211,7 @@ char task_sensors::run (char state)
 	    if (p_adc->convertDone())
 	    {
 		dataArray[loadCellB + i] = p_adc->getValue();
+		timeArray[loadCellB + i] = currentTIME;
 	        return (WAIT);
 	    }
 
@@ -214,3 +228,11 @@ char task_sensors::run (char state)
     // If we get here, no transition is called for
     return (STL_NO_TRANSITION);
 }
+
+void task_sensors::printLinActA ()
+{
+    p_serial << timeArray[linActA] << " " dataArray[linActA] << "\r\n" <<endl;
+    return;
+}
+
+void 
