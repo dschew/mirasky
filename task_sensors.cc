@@ -231,8 +231,30 @@ char task_sensors::run (char state)
 
 void task_sensors::printLinActA ()
 {
-    p_serial << timeArray[linActA] << " " dataArray[linActA] << "\r\n" <<endl;
+    p_serial << timeArray[linActA] << " " << dataArray[linActA] << "\r\n" <<endl;
     return;
 }
 
-void 
+void task_sensors::printLinActB ()
+{
+    p_serial << timeArray[linActA] << " " << dataArray[linActB] << "\r\n" <<endl;
+    return;
+}
+
+void task_sensors::printSixDOFA ()
+{
+    for (int i = 0; i < 6; i++)
+    {
+   	 p_serial << timeArray[sixDOFA + i] " " << dataArray[sixDOFA + i] << "\r\n" <<endl;
+    }
+    return;
+}
+
+void task_sensors:: printSixDOFB ()
+{
+    for (int i = 0; i < 6; i++)
+    {
+	p_serial << timeArray[sixDOFB + i] << " " << dataArray[sixDOFB + i] << "\r\n" <<endl;
+    }
+    return; 
+}
