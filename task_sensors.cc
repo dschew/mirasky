@@ -52,12 +52,12 @@ const unsigned char sixDOF_1    =  ;
 const unsigned char sixDOF_2    =  ;               
 
 // Array Slot Labels
-const int linActA 		= 0;		// Linear actuator #1
-const int linActB		= 1;		// Linear actuator #2
+const int actuatorA 		= 0;		// Linear actuator #1
+const int actuatorB		= 1;		// Linear actuator #2
 const int sixDOFA		= 2;		// Start of the first six DOF slots
 const int sixDOFB		= 7;		// Start of the second six DOF slots
-const int pitot_A		= 13;		// Pitot tube
-const int static_A		= 14;		// Static measurement device
+const int pitotA		= 13;		// Pitot tube
+const int staticA		= 14;		// Static measurement device
 const int loadCellA		= 15;		// Load cell #1
 const int loadCellB		= 16;		// Load cell #2
 
@@ -101,6 +101,7 @@ char task_sensors::run (char state)
     {
         // In State 0, we do nothing for now 
         case (INIT):
+	    // Check A/D connections?
 	    return (WAIT);
 	    break;
 
@@ -118,7 +119,7 @@ char task_sensors::run (char state)
 
 	    if (p_adc->convertDone())
 	    {
-		dataArray[Actuator1] = p_adc->getValue();
+		dataArray[actuatorA] = p_adc->getValue();
 		return (ACT_B):
 	    }
 
@@ -131,28 +132,27 @@ char task_sensors::run (char state)
 
 	    if (p_adc -> convertDone())
 	    {
-		dataArray[Actuator2] = p_adc -> getValue();
+		dataArray[actuatorB] = p_adc -> getValue();
 		return (SIX_DOF_A):
 	    }
 
 	    break;
 
-       // In State 4, we check all the A/D channels for data on the first 6 DOF
-
-        case (SIX_DOF_A):
+        // In State 4, we check all the A/D channels for data on the first 6 DOF
+        case (DOF_A):
 	    for (int i = 0; i < 6; i++)
 	    {
-	   	 dataArray[sixDOF_A + i] =  p_adc->readonce(sixDOF_1 + i);
+	   	 dataArray[sixDOFA + i] =  p_adc->readonce(sixDOF_1 + i);
 	    }
 
-	    return (SIX_DOF_B);
+	    return (DOF_B);
             break;
 
-        // In State 2, we check all the A/D channels for data on the second 6 DOF
-        case (SIX_DOF_B):
+        // In State 5, we check all the A/D channels for data on the second 6 DOF
+        case (DOF_B):
 	    for (int i = 0; i < 6; i++)
 	    {
-		dataArray[sixDOF_B + i] = p_adc->readonce(sixDOF_1 + i);
+		dataArray[sixDOFB + i] = p_adc->readonce(sixDOF_1 + i);
 	    }
 
 	    return (PITOTTUBE);
@@ -163,7 +163,7 @@ char task_sensors::run (char state)
 
 	    if (p_adc->convertDone())
 	    {
-		dataArray[PitotA] = p_adc->getValue();
+		dataArray[pitotA] = p_adc->getValue();
 	    	return (STATICM);
 	    }
 
@@ -171,15 +171,36 @@ char task_sensors::run (char state)
 
 	case (STATICM):
 	    p_adc->startConversion(static_1)
-	    return (LOAD_A)
+	   
+	    if (p_adc->convertDone())
+	    {
+		dataArray[staticA + i] = p_adc->getValue();
+		return (LOAD_A);
+	    }
+
 	    break;
 
-	case (LOAD_1):
-	    return (LOAD_B);
+	case (LOAD_A):
+	    p_adc->startConversion(loadCell_1);
+
+	    if (p_adc->convertDone())
+	    {
+		dataArray[loadCellA + i] = p_adc->getValue();
+	        return (LOAD_B);
+	    }
+
 	    break;
+
 
 	case (LOAD_B):
-	    return (WAIT);
+	    p_adc->startConversion(loadCell_2);
+
+	    if (p_adc->convertDone())
+	    {
+		dataArray[loadCellB + i] = p_adc->getValue();
+	        return (WAIT);
+	    }
+
 	    break;
 
         // If the state isn't a known state, call Houston; we have a problem
