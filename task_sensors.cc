@@ -250,7 +250,7 @@ void task_sensors::printSixDOFA ()
     return;
 }
 
-void task_sensors:: printSixDOFB ()
+void task_sensors::printSixDOFB ()
 {
     for (int i = 0; i < 6; i++)
     {
@@ -258,3 +258,29 @@ void task_sensors:: printSixDOFB ()
     }
     return; 
 }
+
+void task_sensors::printPitot ()
+{	
+    p_serial << timeArray[pitotA + i] << " " << dataArray[pitotA + i] << "\r\n" <<endl;
+    return; 
+}
+
+void task_sensors::printStatic ()
+{
+    p_serial << timeArray[staticA + i] << " " << dataArray[staticA + i] << "\r\n" <<endl;
+    return; 
+}
+
+void task_sensors::printLoadA ()
+{
+    p_serial << timeArray[loadCellA + i] << " " << dataArray[loadCellA + i] << "\r\n" <<endl;
+    return; 
+}
+
+void task_sensors::printLoadB ()
+{
+    p_serial << timeArray[loadCellB + i] << " " << dataArray[loadCellB + i] << "\r\n" <<endl;
+    return;
+}
+
+
