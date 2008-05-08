@@ -1,6 +1,16 @@
 //======================================================================================
 /** \file  task_actuator.cc
  *
+ *  This file contains the code necessary to operate the linear actuators. It reads the
+ *  RC PWM signal from the controller and then converts the duty cycle into a usable
+ *  position for the actuator. It uses interrupts to read the time between the rising
+ *  edge of the signal and the falling edge of the signal.
+ *
+ *	\li  04-11-08  DSC  And the world was created...
+ *	\li  04-15-08  DSC  Setting up interrupts to read the PWM signal
+ *	\li  04-18-08  DSC  Creating task state structure
+ *	\li  04-22-08  DSC  Rearranging states
+ *	
  *  License:
  *    This file released under the Lesser GNU Public License. The program is intended
  *    for educational use only, but its use is not restricted thereto. 
@@ -17,22 +27,31 @@
 #include "stl_task.h"
 #include "task_actuator.h"
 
+// State definitions
 #define UPDATE_STICK_POSITION = 0
 #define STICK_UPDATE_DELAY = 1
 
-bool pinstatus = false;
-bool pinstatusflag = false;
+// Flag shows that pin state (high or low)
+bool pinStatus = false;
+// Flag shows that an interrupt has triggered
+bool pinStatusFlag = false;
+
 //should go in h file
 time_stamp risingedge_time, fallingedge_time, pwm_width;
 
 ISR(INT4_vect)
 {
-    if((PINE & 0b00010000) == 0b00010000){
-	    pinstatusflag = true;//When pin goes high, get the time and store it in a time stamp
-	    pinstatus = true;
+    if((PINE & 0b00010000) == 0b00010000)
+    {
+	// When the pin goes high (rising edge), set the flag to say interrupt has occurred
+	pinStatusFlag = true;
+	// Set pin state to be high
+	pinStatus = true;
     }	
-    else{
-	    pinstatusflag = true;
+    else
+    {
+        // Otherwise 
+	pinstatusflag = true;
 	    pinstatus = false;
     }
 }
